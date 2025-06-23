@@ -12,13 +12,23 @@ var allowedIP string
 var apiToken string
 
 
+func getRealIP(r *http.Request) string {
+	forwarded := r.Header.Get("X-Forwarded-For")
+	if forwarded != "" {
+		return strings.Split(forwarded, ",")[0]
+	}
+	return strings.Split(r.RemoteAddr, ":")[0]
+}
+
+
 func IpWhitelistMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	allowedIP = os.Getenv("ALLOWED_IP")
 	if allowedIP == "" {
 		log.Fatal("ALLOWED_IP is not set")
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		ip := strings.Split(r.RemoteAddr, ":")[0]
+		// ip := strings.Split(r.RemoteAddr, ":")[0]
+		ip := getRealIP(r)
 		log.Printf("Request from IP: %s", ip)
 		if ip != allowedIP {
 			http.Error(w, "Forbidden", http.StatusForbidden)

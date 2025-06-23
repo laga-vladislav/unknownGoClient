@@ -12,6 +12,7 @@ import (
 func GetConfigHandler(w http.ResponseWriter, r *http.Request, configPath string) {
 	data, err := os.ReadFile(configPath)
 	if err != nil {
+		log.Printf("%s", string(data))
 		http.Error(w, "Failed to read config", http.StatusInternalServerError)
 		return
 	}
