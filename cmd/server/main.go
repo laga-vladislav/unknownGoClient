@@ -33,8 +33,12 @@ func main() {
         ),
     )
 
-    log.Println("Server listening on :8080")
-    log.Fatal(http.ListenAndServe(":8080", nil))
+    port := os.Getenv("PORT")
+    if port == "" {
+        port = "7342"
+    }
+    log.Printf("Server listening on :%s", port)
+    log.Fatal(http.ListenAndServe(":"+port, nil))
 }
 
 func configHandler(w http.ResponseWriter, r *http.Request) {

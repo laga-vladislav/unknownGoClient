@@ -8,7 +8,6 @@ services:
       - --providers.docker.exposedbydefault=false
     ports:
       - "80:80"
-      - "8080:8080"
     env_file:
       - .env
     volumes:
@@ -18,8 +17,10 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    environment:
+      - PORT=${PORT:-7342}
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.xray-api.rule=PathPrefix(`/`)"
       - "traefik.http.routers.xray-api.entrypoints=web"
-      - "traefik.http.services.xray-api.loadbalancer.server.port=8080"
+      - "traefik.http.services.xray-api.loadbalancer.server.port=${PORT:-7342}"

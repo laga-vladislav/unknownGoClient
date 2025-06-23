@@ -10,6 +10,6 @@ WORKDIR /app
 COPY --from=go /app/bin/server.bin .
 COPY --from=go /app/.env .
 
-EXPOSE 8080
+EXPOSE ${PORT:-7342}
 
 CMD [ "./server.bin" ]
