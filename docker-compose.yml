@@ -1,0 +1,25 @@
+services:
+  traefik:
+    image: traefik:v3.0
+    command:
+      - --api.dashboard=true
+      - --entrypoints.web.address=:80
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+    ports:
+      - "80:80"
+      - "8080:8080"
+    env_file:
+      - .env
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  unknown-go-client:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.xray-api.rule=PathPrefix(`/`)"
+      - "traefik.http.routers.xray-api.entrypoints=web"
+      - "traefik.http.services.xray-api.loadbalancer.server.port=8080"
