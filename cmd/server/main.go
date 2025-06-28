@@ -34,9 +34,6 @@ func main() {
     )
 
     port := os.Getenv("PORT")
-    if port == "" {
-        port = "7342"
-    }
     log.Printf("Server listening on :%s", port)
     log.Fatal(http.ListenAndServe(":"+port, nil))
 }
