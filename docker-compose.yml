@@ -1,10 +1,21 @@
 services:
   unknown-go-client:
+    container_name: unknown-go-client
+    networks:
+      - xray_net_outside
+    ports:
+      - ${INTERNAL_SERVER_PORT}:${INTERNAL_SERVER_PORT}
     build:
       context: .
       dockerfile: Dockerfile
     environment:
-      - PORT=${PORT:-7342}
-      - XRAY_CONFIG_PATH=${XRAY_CONFIG_PATH:-/usr/local/etc/xray/config.json}
+      - INTERNAL_SERVER_PORT
+      - XRAY_CONFIG_DIR
+    env_file: ".env"
     volumes:
-      - ${XRAY_CONFIG_PATH:-./config.json}:/usr/local/etc/xray/config.json
+      - ${XRAY_CONFIG_DIR:-./xray}:/usr/local/etc/xray/
+
+networks:
+  xray_net_outside:
+    driver: bridge
+    external: true

@@ -17,23 +17,19 @@ func init() {
         log.Fatal("Error loading .env file")
     }
 
-    configPath = os.Getenv("XRAY_CONFIG_PATH")
+    configPath = os.Getenv("XRAY_CONFIG_DIR")
     if configPath == "" {
-        log.Fatal("XRAY_CONFIG_PATH is not set")
+        log.Fatal("XRAY_CONFIG_DIR is not set")
+    } else {
+        configPath += "/config.json"
     }
     log.Println(configPath)
 }
 
 func main() {
-    http.HandleFunc("/config",
-        middleware.IpWhitelistMiddleware(
-            middleware.AuthMiddleware(
-                configHandler,
-            ),
-        ),
-    )
+    http.HandleFunc("/config", middleware.AuthMiddleware(configHandler))
 
-    port := os.Getenv("PORT")
+    port := os.Getenv("INTERNAL_SERVER_PORT")
     log.Printf("Server listening on :%s", port)
     log.Fatal(http.ListenAndServe(":"+port, nil))
 }
