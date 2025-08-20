@@ -1,13 +1,14 @@
 package handler
 
 import (
-    "context"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
 	"os"
+	"reflect"
 
 	"github.com/xtls/xray-core/app/proxyman/command"
 	"github.com/xtls/xray-core/common/protocol"
@@ -106,7 +107,7 @@ func PostConfigHandler(w http.ResponseWriter, r *http.Request, configPath string
 	log.Print("Response status 202 Accepted sent to client")
 }
 
-func getGrpcClient() (command.HandlerServiceClient, *grpc.ClientConn, error, xrayApiPort) {
+func GetGrpcClient(xrayApiPort string) (command.HandlerServiceClient, *grpc.ClientConn, error) {
 	conn, err := grpc.NewClient(fmt.Sprintf("127.0.0.1:%s", xrayApiPort), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, nil, err
@@ -115,7 +116,7 @@ func getGrpcClient() (command.HandlerServiceClient, *grpc.ClientConn, error, xra
 	return client, conn, nil
 }
 
-func addVlessUser(client command.HandlerServiceClient, user *UserInfo) error {
+func AddVlessUser(client command.HandlerServiceClient, user *UserInfo) error {
 	_, err := client.AlterInbound(context.Background(), &command.AlterInboundRequest{
 		Tag: user.InTag,
 		Operation: serial.ToTypedMessage(&command.AddUserOperation{
@@ -132,7 +133,7 @@ func addVlessUser(client command.HandlerServiceClient, user *UserInfo) error {
 	return err
 }
 
-func removeVlessUser(client command.HandlerServiceClient, user *UserInfo) error {
+func RemoveVlessUser(client command.HandlerServiceClient, user *UserInfo) error {
 	_, err := client.AlterInbound(context.Background(), &command.AlterInboundRequest{
 		Tag: user.InTag,
 		Operation: serial.ToTypedMessage(&command.RemoveUserOperation{
@@ -140,40 +141,4 @@ func removeVlessUser(client command.HandlerServiceClient, user *UserInfo) error 
 		}),
 	})
 	return err
-}
-
-func XrayApiUserHandler(w http.ResponseWriter, r *http.Request) {
-	switch r.Method {
-	case http.MethodGet:
-		// For GET, return current config (reuse GetConfigHandler logic)
-		GetConfigHandler(w, r, os.Getenv("XRAY_CONFIG_DIR")+"/config.json")
-	case http.MethodPost:
-		body, err := io.ReadAll(r.Body)
-		if err != nil {
-			http.Error(w, "Failed to read body", http.StatusInternalServerError)
-			return
-		}
-		var user UserInfo
-		if err := json.Unmarshal(body, &user); err != nil {
-			http.Error(w, "Invalid JSON", http.StatusBadRequest)
-			return
-		}
-		if user.InTag == "" || user.Email == "" || user.Uuid == "" {
-			http.Error(w, "Missing fields", http.StatusBadRequest)
-			return
-		}
-		client, conn, err := getGrpcClient()
-		if err != nil {
-			http.Error(w, "gRPC connect failed", http.StatusInternalServerError)
-			return
-		}
-		defer conn.Close()
-		if err := addVlessUser(client, &user); err != nil {
-			http.Error(w, "Add user failed", http.StatusInternalServerError)
-			return
-		}
-		w.WriteHeader(http.StatusAccepted)
-	default:
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-	}
 }
