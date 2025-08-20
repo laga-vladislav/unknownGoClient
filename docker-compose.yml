@@ -11,9 +11,10 @@ services:
     environment:
       - INTERNAL_SERVER_PORT
       - XRAY_CONFIG_DIR
+      - XRAY_API_PORT
     env_file: ".env"
     volumes:
-      - ${XRAY_CONFIG_DIR:-./xray}:/usr/local/etc/xray/
+      - ${XRAY_CONFIG_DIR}:/usr/local/etc/xray/
 
 networks:
   xray_net_outside:

@@ -19,4 +19,4 @@ go.work.sum
 .idea/
 .vscode/
 
-config.json
+xray/config.json
