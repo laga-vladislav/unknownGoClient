@@ -151,9 +151,9 @@ func RemoveVlessUser(client command.HandlerServiceClient, user *UserInfo) error 
 		}),
 	})
 	if err != nil {
-		log.Printf("Failed to remove VLESS user: %v", err)
+		log.Printf("Error while removing VLESS user: %v", err)
 		return err
 	}
-	log.Printf("VLESS user removed successfully")
+	log.Printf("VLESS user has been removed successfully")
 	return nil
 }
