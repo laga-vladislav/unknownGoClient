@@ -107,8 +107,8 @@ func PostConfigHandler(w http.ResponseWriter, r *http.Request, configPath string
 }
 
 func GetGrpcClient(xrayApiPort string) (command.HandlerServiceClient, *grpc.ClientConn, error) {
-	log.Printf("Connecting to gRPC server at 127.0.0.1:%s", xrayApiPort)
-	conn, err := grpc.NewClient(fmt.Sprintf("127.0.0.1:%s", xrayApiPort), grpc.WithTransportCredentials(insecure.NewCredentials()))
+	log.Printf("Connecting to gRPC server at xray:%s", xrayApiPort)
+	conn, err := grpc.NewClient(fmt.Sprintf("xray:%s", xrayApiPort), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Printf("Failed to connect to gRPC server: %v", err)
 		return nil, nil, err
