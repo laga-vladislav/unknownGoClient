@@ -10,6 +10,7 @@ import (
 )
 
 var configPath string
+var xrayApiPort string
 
 func init() {
     err := godotenv.Load()
@@ -18,16 +19,19 @@ func init() {
     }
 
     configPath = os.Getenv("XRAY_CONFIG_DIR")
-    if configPath == "" {
-        log.Fatal("XRAY_CONFIG_DIR is not set")
+    xrayApiPort = os.Getenv("XRAY_API_PORT")
+    if configPath == "" || xrayApiPort == "" {
+        log.Fatal("XRAY_CONFIG_DIR or XRAY_API_PORT are not set")
     } else {
         configPath += "/config.json"
     }
     log.Println(configPath)
+    log.Println(xrayApiPort)
 }
 
 func main() {
     http.HandleFunc("/config", middleware.AuthMiddleware(configHandler))
+    http.HandleFunc("/xray-api/user", middleware.AuthMiddleware(handler.XrayApiUserHandler))
 
     port := os.Getenv("INTERNAL_SERVER_PORT")
     log.Printf("Server listening on :%s", port)
@@ -43,4 +47,7 @@ func configHandler(w http.ResponseWriter, r *http.Request) {
     default:
         http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
     }
+}
+
+func xrayApiHandler() {
 }
